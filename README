@@ -1,0 +1,14 @@
+mandelbrot - visualize Mandelbrot set using SIMD
+Written in 2013 by <Ahmet Inan> <xdsopl@googlemail.com>
+To the extent possible under law, the author(s) have dedicated all copyright and related and neighboring rights to this software to the public domain worldwide. This software is distributed without any warranty.
+You should have received a copy of the CC0 Public Domain Dedication along with this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
+
+Actually wrote this in 2007 but with SSE only and with a lot more fancy optimizations in it.
+Now that we have AVX, just made it work for SSE and AVX without much of code duplication.
+Also removed all the fancy stuff, so it keeps simple and readable.
+
+klick left mouse button and move mouse to move plane,
+klick right mouse button and move mouse to zoom in or out.
+
+press "r" to reset and "q" or "ESC" to exit.
+
