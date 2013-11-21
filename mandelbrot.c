@@ -149,7 +149,7 @@ void calc(float t[NUM], complex float c[NUM])
 {
 	complex float z[NUM];
 	memset(z, 0, sizeof(z));
-	memset(t, 0, sizeof(int) * NUM);
+	memset(t, 0, sizeof(float) * NUM);
 	for (int n = 0; n < 100; n++) {
 		for (int i = 0; i < NUM; i++) {
 			float abs2 = crealf(z[i]) * crealf(z[i]) + cimagf(z[i]) * cimagf(z[i]);
@@ -178,7 +178,7 @@ void calc(float T[NUM], complex float C[NUM])
 	vnsf t[NUM / vnsf_len];
 	memset(z_real, 0, sizeof(z_real));
 	memset(z_imag, 0, sizeof(z_imag));
-	memset(t, 0, sizeof(float) * NUM);
+	memset(t, 0, sizeof(t));
 	for (int n = 0; n < 100; n++) {
 		for (int i = 0; i < NUM / vnsf_len; i++) {
 			vnsf abs2 = z_real[i] * z_real[i] + z_imag[i] * z_imag[i];
