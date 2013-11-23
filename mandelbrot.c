@@ -145,23 +145,22 @@ void handle_stats(double elapsed, uint64_t stat_pixel, uint64_t pixels)
 }
 
 #if 0
-void calc(float t[NUM], complex float c[NUM])
+void calc(int t[NUM], complex float c[NUM])
 {
-	complex float z[NUM];
-	memset(z, 0, sizeof(z));
-	memset(t, 0, sizeof(float) * NUM);
-	for (int n = 0; n < 100; n++) {
-		for (int i = 0; i < NUM; i++) {
-			float abs2 = crealf(z[i]) * crealf(z[i]) + cimagf(z[i]) * cimagf(z[i]);
-			t[i] += abs2 < 4.0f;
-			z[i] = z[i] * z[i] + c[i];
+	for (int i = 0; i < NUM; i++) {
+		complex float z = 0;
+		for (t[i] = 0; t[i] < 100; t[i]++) {
+			float abs2 = crealf(z) * crealf(z) + cimagf(z) * cimagf(z);
+			if (abs2 >= 4.0f)
+				break;
+			z = z * z + c[i];
 		}
+		if (t[i] >= 100)
+			t[i] = 0;
 	}
-	for (int i = 0; i < NUM; i++)
-		t[i] = t[i] < 100.0f ? t[i] : 0.0f;
 }
 #else
-void calc(float T[NUM], complex float C[NUM])
+void calc(int T[NUM], complex float C[NUM])
 {
 	const vnsf _1 = vnsf_set1(1.0f);
 	const vnsf _2 = vnsf_set1(2.0f);
@@ -191,7 +190,8 @@ void calc(float T[NUM], complex float C[NUM])
 	}
 	for (int i = 0; i < NUM / vnsf_len; i++)
 		t[i] = (vnsf)(vnsf_cmplt(t[i], _100) & (vnsu)t[i]);
-	memcpy(T, t, sizeof(t));
+	for (int i = 0; i < NUM; i++)
+		T[i] = ((float *)t)[i];
 }
 #endif
 
@@ -222,12 +222,12 @@ int main()
 			for (int k = 0; k < NUM; k++)
 				c[k] = (zoom * (dx * (float)((j+k)%w) - 0.5f) + xoff)
 					+ I * (zoom * (dy * (float)((j+k)/w) - 0.5f) + yoff);
-			float t[NUM];
+			int t[NUM];
 			calc(t, c);
 			for (int k = 0; k < NUM; k++) {
 				float r = 0.0016f * t[k] * t[k];
 				float g = 0.0012f * t[k] * t[k];
-				float b = 0.0008f * t[k] * (t[k] + 50.0f);
+				float b = 0.0008f * t[k] * (t[k] + 50);
 				*fbp++ = argb(r, g, b);
 			}
 		}
