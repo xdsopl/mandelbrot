@@ -202,6 +202,14 @@ uint32_t argb(float r, float g, float b)
 		((int)fminf(fmaxf(255.0f * b, 0.0f), 255.0f));
 }
 
+uint32_t color(float v)
+{
+	float r = 0.0016f * v * v;
+	float g = 0.0012f * v * v;
+	float b = 0.0008f * v * (v + 50.0f);
+	return argb(r, g, b);
+}
+
 int main()
 {
 	SDL_Init(SDL_INIT_VIDEO);
@@ -224,12 +232,8 @@ int main()
 					+ I * (zoom * (dy * (float)((j+k)/w) - 0.5f) + yoff);
 			int t[NUM];
 			calc(t, c);
-			for (int k = 0; k < NUM; k++) {
-				float r = 0.0016f * t[k] * t[k];
-				float g = 0.0012f * t[k] * t[k];
-				float b = 0.0008f * t[k] * (t[k] + 50);
-				*fbp++ = argb(r, g, b);
-			}
+			for (int k = 0; k < NUM; k++)
+				fbp[j + k] = color(t[k]);
 		}
 		stat_pixels += w*h;
 		uint32_t cur_ticks = SDL_GetTicks();
