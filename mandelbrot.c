@@ -204,9 +204,9 @@ uint32_t argb(float r, float g, float b)
 
 uint32_t color(float v)
 {
-	float r = 0.0016f * v * v;
-	float g = 0.0012f * v * v;
-	float b = 0.0008f * v * (v + 50.0f);
+	float r = 4.0f * v - 2.0f;
+	float g = 2.0f - 4.0f * fabsf(v - 0.5f);
+	float b = 2.0f - 4.0f * v;
 	return argb(r, g, b);
 }
 
@@ -233,7 +233,7 @@ int main()
 			int t[NUM];
 			calc(t, c);
 			for (int k = 0; k < NUM; k++)
-				fbp[j + k] = color(t[k]);
+				fbp[j + k] = t[k] ? color(0.01f * t[k]) : 0;
 		}
 		stat_pixels += w*h;
 		uint32_t cur_ticks = SDL_GetTicks();
