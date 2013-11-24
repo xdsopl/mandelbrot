@@ -28,7 +28,8 @@ typedef unsigned vnsu __attribute__ ((__vector_size__ (16)));
 
 SDL_Surface *screen;
 const int NUM = 32;
-#define MAX_ITER (100)
+#define MAX_ITER (500)
+#define MOST_ITER (MAX_ITER / 4)
 
 float zoom = 5.0;
 float xoff = -0.75;
@@ -179,7 +180,20 @@ void calc(int T[NUM], complex float C[NUM])
 	memset(z_real, 0, sizeof(z_real));
 	memset(z_imag, 0, sizeof(z_imag));
 	memset(t, 0, sizeof(t));
-	for (int n = 0; n < MAX_ITER; n++) {
+	for (int n = 0; n < MOST_ITER; n++) {
+		for (int i = 0; i < NUM / vnsf_len; i++) {
+			vnsf abs2 = z_real[i] * z_real[i] + z_imag[i] * z_imag[i];
+			t[i] += (vnsf)((vnsu)_1 & vnsf_cmplt(abs2, _4));
+			vnsf tmp_real = z_real[i] * z_real[i] - z_imag[i] * z_imag[i] + c_real[i];
+			vnsf tmp_imag = _2 * z_imag[i] * z_real[i] + c_imag[i];
+			z_real[i] = tmp_real;
+			z_imag[i] = tmp_imag;
+		}
+	}
+	int inside = 0;
+	for (int i = 0; i < NUM; i++)
+		inside |= ((float *)t)[i] >= (float)MOST_ITER;
+	if (inside) for (int n = MOST_ITER; n < MAX_ITER; n++) {
 		for (int i = 0; i < NUM / vnsf_len; i++) {
 			vnsf abs2 = z_real[i] * z_real[i] + z_imag[i] * z_imag[i];
 			t[i] += (vnsf)((vnsu)_1 & vnsf_cmplt(abs2, _4));
