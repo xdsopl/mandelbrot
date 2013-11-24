@@ -218,6 +218,8 @@ int main()
 	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
 	uint32_t stat_ticks = SDL_GetTicks();
 	uint64_t stat_pixels = 0;
+	float hue_map[100];
+	memset(hue_map, 0, sizeof(hue_map));
 	while (1) {
 		handle_events();
 		uint32_t *fbp = (uint32_t *)screen->pixels;
@@ -225,6 +227,9 @@ int main()
 		int h = screen->h;
 		float dx = 1.0f / (float)w;
 		float dy = 1.0f / (float)h;
+		int hist[100];
+		memset(hist, 0, sizeof(hist));
+
 		for (int j = 0; j < (h * w - NUM); j += NUM) {
 			complex float c[NUM];
 			for (int k = 0; k < NUM; k++)
@@ -232,9 +237,22 @@ int main()
 					+ I * (zoom * (dy * (float)((j+k)/w) - 0.5f) + yoff);
 			int t[NUM];
 			calc(t, c);
+
 			for (int k = 0; k < NUM; k++)
-				fbp[j + k] = t[k] ? color(0.01f * t[k]) : 0;
+				hist[t[k]]++;
+
+			for (int k = 0; k < NUM; k++)
+				fbp[j + k] = t[k] ? color(hue_map[t[k]]) : 0;
 		}
+
+		int total = 0;
+		for (int i = 1; i < 100; i++)
+			total += hist[i];
+		hue_map[0] = 0.0f;
+		hue_map[1] = 0.0f;
+		for (int i = 2; i < 100; i++)
+			hue_map[i] = hue_map[i-1] + (float)hist[i-1] / (float)total;
+
 		stat_pixels += w*h;
 		uint32_t cur_ticks = SDL_GetTicks();
 		if ((cur_ticks - stat_ticks) > 1000) {
