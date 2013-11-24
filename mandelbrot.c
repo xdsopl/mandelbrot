@@ -218,6 +218,7 @@ int main()
 	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
 	uint32_t stat_ticks = SDL_GetTicks();
 	uint64_t stat_pixels = 0;
+	float offset = 0.0f, factor = 0.01f;
 	while (1) {
 		handle_events();
 		uint32_t *fbp = (uint32_t *)screen->pixels;
@@ -225,6 +226,7 @@ int main()
 		int h = screen->h;
 		float dx = 1.0f / (float)w;
 		float dy = 1.0f / (float)h;
+		int min = 100, max = 0;
 		for (int j = 0; j < (h * w - NUM); j += NUM) {
 			complex float c[NUM];
 			for (int k = 0; k < NUM; k++)
@@ -232,9 +234,19 @@ int main()
 					+ I * (zoom * (dy * (float)((j+k)/w) - 0.5f) + yoff);
 			int t[NUM];
 			calc(t, c);
+
+			for (int k = 0; k < NUM && t[k]; k++) {
+				min = min < t[k] ? min : t[k];
+				max = max > t[k] ? max : t[k];
+			}
+
 			for (int k = 0; k < NUM; k++)
-				fbp[j + k] = t[k] ? color(0.01f * t[k]) : 0;
+				fbp[j + k] = t[k] ? color(factor * (t[k] + offset)) : 0;
 		}
+
+		offset = -min;
+		factor = 1.0f / (float)(max - min);
+
 		stat_pixels += w*h;
 		uint32_t cur_ticks = SDL_GetTicks();
 		if ((cur_ticks - stat_ticks) > 1000) {
