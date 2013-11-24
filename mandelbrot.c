@@ -28,6 +28,7 @@ typedef unsigned vnsu __attribute__ ((__vector_size__ (16)));
 
 SDL_Surface *screen;
 const int NUM = 32;
+#define MAX_ITER (100)
 
 float zoom = 5.0;
 float xoff = -0.75;
@@ -149,13 +150,13 @@ void calc(int t[NUM], complex float c[NUM])
 {
 	for (int i = 0; i < NUM; i++) {
 		complex float z = 0;
-		for (t[i] = 0; t[i] < 100; t[i]++) {
+		for (t[i] = 0; t[i] < MAX_ITER; t[i]++) {
 			float abs2 = crealf(z) * crealf(z) + cimagf(z) * cimagf(z);
 			if (abs2 >= 4.0f)
 				break;
 			z = z * z + c[i];
 		}
-		if (t[i] >= 100)
+		if (t[i] >= MAX_ITER)
 			t[i] = 0;
 	}
 }
@@ -165,7 +166,7 @@ void calc(int T[NUM], complex float C[NUM])
 	const vnsf _1 = vnsf_set1(1.0f);
 	const vnsf _2 = vnsf_set1(2.0f);
 	const vnsf _4 = vnsf_set1(4.0f);
-	const vnsf _100 = vnsf_set1(100.0f);
+	const vnsf _MAX_ITER = vnsf_set1((float)MAX_ITER);
 	vnsf c_real[NUM / vnsf_len];
 	vnsf c_imag[NUM / vnsf_len];
 	for (int i = 0; i < NUM; i++) {
@@ -178,7 +179,7 @@ void calc(int T[NUM], complex float C[NUM])
 	memset(z_real, 0, sizeof(z_real));
 	memset(z_imag, 0, sizeof(z_imag));
 	memset(t, 0, sizeof(t));
-	for (int n = 0; n < 100; n++) {
+	for (int n = 0; n < MAX_ITER; n++) {
 		for (int i = 0; i < NUM / vnsf_len; i++) {
 			vnsf abs2 = z_real[i] * z_real[i] + z_imag[i] * z_imag[i];
 			t[i] += (vnsf)((vnsu)_1 & vnsf_cmplt(abs2, _4));
@@ -189,7 +190,7 @@ void calc(int T[NUM], complex float C[NUM])
 		}
 	}
 	for (int i = 0; i < NUM / vnsf_len; i++)
-		t[i] = (vnsf)(vnsf_cmplt(t[i], _100) & (vnsu)t[i]);
+		t[i] = (vnsf)(vnsf_cmplt(t[i], _MAX_ITER) & (vnsu)t[i]);
 	for (int i = 0; i < NUM; i++)
 		T[i] = ((float *)t)[i];
 }
@@ -230,9 +231,9 @@ int main()
 	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
 	uint32_t stat_ticks = SDL_GetTicks();
 	uint64_t stat_pixels = 0;
-	uint32_t palette[100];
-	for (int i = 0; i < 100; i++)
-		palette[i] = i ? color(0.01f * i) : 0;
+	uint32_t palette[MAX_ITER];
+	for (int i = 0; i < MAX_ITER; i++)
+		palette[i] = i ? color(i / (float)MAX_ITER) : 0;
 	while (1) {
 		handle_events();
 		uint32_t *fbp = (uint32_t *)screen->pixels;
@@ -252,7 +253,7 @@ int main()
 		}
 #if 0
 		for (int j = 0; j < h; j++)
-			for (int i = 0; i < 100; i++)
+			for (int i = 0; i < MAX_ITER; i++)
 				fbp[j * w + i] = palette[i];
 #endif
 		stat_pixels += w*h;
