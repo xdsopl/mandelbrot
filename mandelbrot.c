@@ -195,11 +195,23 @@ void calc(int T[NUM], complex float C[NUM])
 }
 #endif
 
-uint32_t argb(float r, float g, float b)
+uint32_t srgb(float r, float g, float b)
 {
-	return ((int)fminf(fmaxf(255.0f * r, 0.0f), 255.0f) << 16) |
-		((int)fminf(fmaxf(255.0f * g, 0.0f), 255.0f) << 8) |
-		((int)fminf(fmaxf(255.0f * b, 0.0f), 255.0f));
+	r = fminf(fmaxf(r, 0.0f), 1.0f);
+	g = fminf(fmaxf(g, 0.0f), 1.0f);
+	b = fminf(fmaxf(b, 0.0f), 1.0f);
+#if 1
+	float K0 = 0.03928f;
+	float a = 0.055f;
+	float phi = 12.92f;
+	float gamma = 2.4f;
+	r = r <= K0 ? r / phi : powf((r + a) / (1.0f + a), gamma);
+	g = g <= K0 ? g / phi : powf((g + a) / (1.0f + a), gamma);
+	b = b <= K0 ? b / phi : powf((b + a) / (1.0f + a), gamma);
+#endif
+	return (int)(255.0f * r) << 16 |
+		(int)(255.0f * g) << 8 |
+		(int)(255.0f * b);
 }
 
 uint32_t color(float v)
@@ -207,7 +219,7 @@ uint32_t color(float v)
 	float r = 4.0f * v - 2.0f;
 	float g = 2.0f - 4.0f * fabsf(v - 0.5f);
 	float b = 2.0f - 4.0f * v;
-	return argb(r, g, b);
+	return srgb(r, g, b);
 }
 
 int main()
@@ -218,6 +230,9 @@ int main()
 	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
 	uint32_t stat_ticks = SDL_GetTicks();
 	uint64_t stat_pixels = 0;
+	uint32_t palette[100];
+	for (int i = 0; i < 100; i++)
+		palette[i] = i ? color(0.01f * i) : 0;
 	while (1) {
 		handle_events();
 		uint32_t *fbp = (uint32_t *)screen->pixels;
@@ -233,8 +248,13 @@ int main()
 			int t[NUM];
 			calc(t, c);
 			for (int k = 0; k < NUM; k++)
-				fbp[j + k] = t[k] ? color(0.01f * t[k]) : 0;
+				fbp[j + k] = palette[t[k]];
 		}
+#if 0
+		for (int j = 0; j < h; j++)
+			for (int i = 0; i < 100; i++)
+				fbp[j * w + i] = palette[i];
+#endif
 		stat_pixels += w*h;
 		uint32_t cur_ticks = SDL_GetTicks();
 		if ((cur_ticks - stat_ticks) > 1000) {
