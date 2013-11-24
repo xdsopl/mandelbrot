@@ -235,9 +235,9 @@ int main()
 			int t[NUM];
 			calc(t, c);
 
-			for (int k = 0; k < NUM && t[k]; k++) {
-				min = min < t[k] ? min : t[k];
-				max = max > t[k] ? max : t[k];
+			for (int k = 0; k < NUM; k++) {
+				min = !t[k] || min < t[k] ? min : t[k];
+				max = !t[k] || max > t[k] ? max : t[k];
 			}
 
 			for (int k = 0; k < NUM; k++)
