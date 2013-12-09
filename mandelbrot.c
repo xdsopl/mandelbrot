@@ -205,9 +205,9 @@ uint32_t srgb(float r, float g, float b)
 	float a = 0.055f;
 	float phi = 12.92f;
 	float gamma = 2.4f;
-	r = r <= K0 ? r / phi : powf((r + a) / (1.0f + a), gamma);
-	g = g <= K0 ? g / phi : powf((g + a) / (1.0f + a), gamma);
-	b = b <= K0 ? b / phi : powf((b + a) / (1.0f + a), gamma);
+	r = r <= K0 / phi ? r * phi : (1.0f + a) * powf(r, 1.0f / gamma) - a;
+	g = g <= K0 / phi ? g * phi : (1.0f + a) * powf(g, 1.0f / gamma) - a;
+	b = b <= K0 / phi ? b * phi : (1.0f + a) * powf(b, 1.0f / gamma) - a;
 #endif
 	return (int)(255.0f * r) << 16 |
 		(int)(255.0f * g) << 8 |
