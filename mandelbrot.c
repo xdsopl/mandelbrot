@@ -216,9 +216,9 @@ uint32_t srgb(float r, float g, float b)
 
 uint32_t color(float v)
 {
-	float r = 4.0f * v - 2.0f;
-	float g = 2.0f - 4.0f * fabsf(v - 0.5f);
-	float b = 2.0f - 4.0f * v;
+	float r = 6.0f * fabsf(v - 3.0f / 6.0f) - 1.0f;
+	float g = 2.0f - 6.0f * fabsf(v - 2.0f / 6.0f);
+	float b = 2.0f - 6.0f * fabsf(v - 4.0f / 6.0f);
 	return srgb(r, g, b);
 }
 
