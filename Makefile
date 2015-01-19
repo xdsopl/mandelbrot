@@ -1,7 +1,7 @@
 
 #CC = $(notdir $(shell ls /usr/bin/gcc-*.*.* | tail -n1))
 
-LDFLAGS = $(shell sdl-config --libs)
+LDLIBS = $(shell sdl-config --libs) -lm
 CFLAGS = $(shell sdl-config --cflags) \
 	-D_GNU_SOURCE=1 \
 	-std=c99 -W -Wall -O3 \
